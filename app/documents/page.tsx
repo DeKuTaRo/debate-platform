@@ -31,7 +31,8 @@ export default function DocumentsPage() {
     setLoading(true);
     setTimeout(() => {
       const loadedDocuments = documentStorageService.getDocuments();
-      setDocuments(loadedDocuments);
+      const loadedVideos = documentStorageService.getVideos(); // Lấy danh sách video
+      setDocuments([...loadedDocuments, ...loadedVideos]); // Kết hợp tài liệu và video
       setLoading(false);
     }, 300);
   };

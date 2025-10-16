@@ -101,6 +101,8 @@ export default function AIDebatePage() {
         content: data.response,
       }
 
+      console.log("AI Response:", data.response)
+
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
       const errorMessage: Message = {

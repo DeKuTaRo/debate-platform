@@ -32,4 +32,32 @@ export const documentStorageService = {
     );
     documentStorageService.saveDocuments(updatedDocuments);
   },
+  getVideos: (): Document[] => {
+    return [
+      {
+        id: "video-1",
+        title: "Video 1",
+        description: "Đây là video tham khảo số 1",
+        fileUrl: "/videos/1.mov",
+        fileType: "MOV",
+        createdAt: new Date(),
+      },
+      {
+        id: "video-2",
+        title: "Video 2",
+        description: "Đây là video tham khảo số 2",
+        fileUrl: "/videos/2.mov",
+        fileType: "MOV",
+        createdAt: new Date(),
+      },
+      {
+        id: "video-3",
+        title: "Video 3",
+        description: "Đây là video tham khảo số 3",
+        fileUrl: "/videos/3.mov",
+        fileType: "MOV",
+        createdAt: new Date(),
+      },
+    ];
+  },
 };

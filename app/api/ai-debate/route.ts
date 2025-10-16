@@ -97,7 +97,8 @@ export async function POST(req: Request) {
       data?.candidates?.[0]?.output_text ??
       "Xin lỗi, tôi chưa có câu trả lời phù hợp.";
 
-    return NextResponse.json({ response: text });
+      console.log("Gemini Raw Response:", text);
+      return NextResponse.json({ response: text });
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message ?? "Unexpected error" },
