@@ -103,7 +103,6 @@ export default function AIDebatePage() {
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("Error:", error)
       const errorMessage: Message = {
         role: "assistant",
         content: "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.",

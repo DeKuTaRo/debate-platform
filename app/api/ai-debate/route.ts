@@ -1,44 +1,107 @@
-import { generateText } from "ai"
+// app/api/ai-debate/route.ts
+import { NextResponse } from "next/server";
+
+type Message = { role: "user" | "assistant"; content: string };
+
+function toGeminiRole(role: Message["role"]): "user" | "model" {
+  return role === "assistant" ? "model" : "user";
+}
 
 export async function POST(req: Request) {
   try {
-    const { topic, position, userMessage, conversationHistory } = await req.json()
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Thiếu biến môi trường GEMINI_API_KEY" },
+        { status: 500 }
+      );
+    }
 
-    const oppositePosition = position === "support" ? "oppose" : "support"
-    const positionText = oppositePosition === "support" ? "ủng hộ" : "phản đối"
+    const body = await req.json();
+    const {
+      topic,
+      position, // "support" | "oppose"
+      userMessage,
+      conversationHistory,
+    }: {
+      topic: string;
+      position: "support" | "oppose";
+      userMessage: string;
+      conversationHistory: Message[];
+    } = body;
 
-    const systemPrompt = `Bạn là một chuyên gia tranh biện thông minh và lịch sự. Bạn đang tham gia một cuộc tranh luận về chủ đề: "${topic}".
+    // 1) Lịch sử hội thoại (map sang role 'user' | 'model' và parts[])
+    const history = (conversationHistory || []).map((m) => ({
+      role: toGeminiRole(m.role),
+      parts: [{ text: m.content }],
+    }));
 
-Vai trò của bạn:
-- Bạn đang ở vị trí ${positionText} chủ đề này
-- Đưa ra các lập luận logic, có căn cứ và thuyết phục
-- Phản biện một cách tôn trọng và xây dựng
-- Sử dụng ví dụ thực tế và dữ liệu khi có thể
-- Trả lời bằng tiếng Việt
-- Giữ câu trả lời ngắn gọn (2-4 đoạn văn)
-- Không lặp lại những gì đã nói trước đó
+    // 2) Thêm lượt người dùng hiện tại vào cuối contents
+    const latestUserTurn = {
+      role: "user",
+      parts: [{ text: userMessage }],
+    };
 
-Hãy tranh luận một cách chuyên nghiệp và thuyết phục.`
+    // 3) Ràng buộc “đóng vai đối lập”
+    const opposite = position === "support" ? "phản đối" : "ủng hộ";
 
-    const messages = [
-      { role: "system" as const, content: systemPrompt },
-      ...conversationHistory.map((msg: any) => ({
-        role: msg.role as "user" | "assistant",
-        content: msg.content,
-      })),
-      { role: "user" as const, content: userMessage },
-    ]
+    // 4) Gọi REST API generateContent
+    // Docs: generateContent (v1beta) + contents[] multi-turn
+    // https://ai.google.dev/api  +  https://cloud.google.com/vertex-ai/.../generateContent
+    const resp = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          // Hướng dẫn hệ thống (v1beta hỗ trợ) để luôn tranh biện "đối lập"
+          system_instruction: {
+            parts: [
+              {
+                text:
+                  `Bạn là một chuyên gia tranh biện. ` +
+                  `Nhiệm vụ: luôn ${opposite} quan điểm của người dùng về chủ đề: "${topic}". ` +
+                  `Giữ thái độ lịch sự, đưa luận điểm chặt chẽ, phản biện có dẫn chứng, kết thúc bằng gợi ý câu hỏi mở.`,
+              },
+            ],
+          },
+          contents: [...history, latestUserTurn],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.9,
+            maxOutputTokens: 1024,
+          },
+        }),
+      }
+    );
 
-    const { text } = await generateText({
-      model: "openai/gpt-4o-mini",
-      messages,
-      temperature: 0.8,
-      maxTokens: 500,
-    })
+    if (!resp.ok) {
+      const err = await resp.text();
+      return NextResponse.json(
+        { error: `Gemini API error: ${resp.status} ${err}` },
+        { status: 502 }
+      );
+    }
 
-    return Response.json({ response: text })
-  } catch (error) {
-    console.error("[v0] AI debate error:", error)
-    return Response.json({ error: "Đã xảy ra lỗi khi xử lý yêu cầu" }, { status: 500 })
+    const data = await resp.json();
+
+    // Chuẩn hoá text trả về
+    const text =
+      data?.candidates?.[0]?.content?.parts
+        ?.map((p: any) => p?.text)
+        .join("") ??
+      data?.candidates?.[0]?.output_text ??
+      "Xin lỗi, tôi chưa có câu trả lời phù hợp.";
+
+    return NextResponse.json({ response: text });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? "Unexpected error" },
+      { status: 500 }
+    );
   }
 }
