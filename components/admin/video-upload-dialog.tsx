@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,41 +11,41 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Upload, Video } from "lucide-react"
-import { videoStorageService } from "@/lib/video-storage"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Upload, Video } from "lucide-react";
+import { videoStorageService } from "@/lib/video-storage";
 
 interface VideoUploadDialogProps {
-  onVideoUploaded?: () => void
+  onVideoUploaded?: () => void;
 }
 
 export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [videoUrl, setVideoUrl] = useState("")
-  const [thumbnailUrl, setThumbnailUrl] = useState("")
-  const [duration, setDuration] = useState("")
-  const [uploading, setUploading] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [duration, setDuration] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setVideoFile(file)
-      const url = URL.createObjectURL(file)
-      setVideoUrl(url)
+      setVideoFile(file);
+      const url = URL.createObjectURL(file);
+      setVideoUrl(url);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!title || !videoUrl) return
+    e.preventDefault();
+    if (!title || !videoUrl) return;
 
-    setUploading(true)
+    setUploading(true);
     try {
       videoStorageService.saveVideo({
         title,
@@ -53,22 +53,22 @@ export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
         videoUrl,
         thumbnailUrl,
         duration,
-      })
+      });
 
-      setTitle("")
-      setDescription("")
-      setVideoFile(null)
-      setVideoUrl("")
-      setThumbnailUrl("")
-      setDuration("")
-      setOpen(false)
-      onVideoUploaded?.()
+      setTitle("");
+      setDescription("");
+      setVideoFile(null);
+      setVideoUrl("");
+      setThumbnailUrl("");
+      setDuration("");
+      setOpen(false);
+      onVideoUploaded?.();
     } catch (error) {
-      console.error("Error uploading video:", error)
+      console.error("Error uploading video:", error);
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -81,7 +81,9 @@ export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Thêm video hướng dẫn</DialogTitle>
-          <DialogDescription>Tải lên video hướng dẫn mới cho người dùng</DialogDescription>
+          <DialogDescription>
+            Tải lên video hướng dẫn mới cho người dùng
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -110,10 +112,18 @@ export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="video-file">Tải lên video *</Label>
             <div className="flex items-center gap-2">
-              <Input id="video-file" type="file" accept="video/*" onChange={handleVideoFileChange} className="flex-1" />
+              <Input
+                id="video-file"
+                type="file"
+                accept="video/*"
+                onChange={handleVideoFileChange}
+                className="flex-1"
+              />
               {videoFile && <Video className="h-5 w-5 text-primary" />}
             </div>
-            <p className="text-xs text-muted-foreground">Hoặc nhập URL video bên dưới</p>
+            <p className="text-xs text-muted-foreground">
+              Hoặc nhập URL video bên dưới
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -148,7 +158,11 @@ export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Hủy
             </Button>
             <Button type="submit" disabled={uploading || !title || !videoUrl}>
@@ -158,5 +172,5 @@ export function VideoUploadDialog({ onVideoUploaded }: VideoUploadDialogProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

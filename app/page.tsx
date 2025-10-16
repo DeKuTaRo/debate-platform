@@ -1,39 +1,51 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { VideoCard } from "@/components/video-card"
-import { VideoPlayerDialog } from "@/components/video-player-dialog"
-import { VideoUploadDialog } from "@/components/admin/video-upload-dialog"
-import { useAdmin } from "@/contexts/admin-context"
-import { videoStorageService } from "@/lib/video-storage"
-import type { VideoTutorial } from "@/lib/types"
-import { BookOpen, Bot, History, ArrowRight, Video } from "lucide-react"
-import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useState, useEffect } from "react";
+import { Header } from "@/components/header";
+import { VideoCard } from "@/components/video-card";
+import { VideoPlayerDialog } from "@/components/video-player-dialog";
+import { VideoUploadDialog } from "@/components/admin/video-upload-dialog";
+import { useAdmin } from "@/contexts/admin-context";
+import { videoStorageService } from "@/lib/video-storage";
+import type { VideoTutorial } from "@/lib/types";
+import { BookOpen, Bot, History, ArrowRight, Video } from "lucide-react";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
-  const { isAdmin } = useAdmin()
-  const [videos, setVideos] = useState<VideoTutorial[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedVideo, setSelectedVideo] = useState<VideoTutorial | null>(null)
+  const { isAdmin } = useAdmin();
+  const [videos, setVideos] = useState<VideoTutorial[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedVideo, setSelectedVideo] = useState<VideoTutorial | null>(
+    null
+  );
 
   useEffect(() => {
-    loadVideos()
-  }, [])
+    loadVideos();
+  }, []);
 
   const loadVideos = () => {
-    setLoading(true)
+    setLoading(true);
     setTimeout(() => {
-      const loadedVideos = videoStorageService.getVideos()
-      setVideos(loadedVideos)
-      setLoading(false)
-    }, 300)
-  }
+      const loadedVideos = videoStorageService.getVideos();
+      setVideos(loadedVideos);
+      setLoading(false);
+    }, 300);
+  };
 
   const handleVideoUploaded = () => {
-    loadVideos()
-  }
+    loadVideos();
+  };
+
+  const handleEditVideo = (updatedVideo: VideoTutorial) => {
+    videoStorageService.updateVideo(updatedVideo.id, updatedVideo);
+    loadVideos();
+  };
+
+  const handleDeleteVideo = (video: VideoTutorial) => {
+    videoStorageService.deleteVideo(video.id);
+    loadVideos();
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,9 +55,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl space-y-12">
           {/* Hero Section */}
           <div className="text-center space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-balance">Nâng cao khả năng tranh biện</h1>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-balance">
+              Nâng cao khả năng tranh biện
+            </h1>
             <p className="text-lg sm:text-xl text-muted-foreground text-pretty max-w-2xl mx-auto">
-              Phát triển kỹ năng tranh luận, tư duy phản biện và giao tiếp hiệu quả thông qua các chủ đề thực tế
+              Phát triển kỹ năng tranh luận, tư duy phản biện và giao tiếp hiệu
+              quả thông qua các chủ đề thực tế
             </p>
           </div>
 
@@ -54,7 +69,9 @@ export default function HomePage() {
             <Link href="/topics" className="group">
               <div className="p-6 rounded-lg border bg-card hover:bg-accent transition-colors h-full">
                 <BookOpen className="h-10 w-10 mb-4 text-primary" />
-                <h3 className="font-semibold text-lg mb-2">Chủ đề tranh luận</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Chủ đề tranh luận
+                </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Khám phá các chủ đề hot và chia sẻ quan điểm của bạn
                 </p>
@@ -67,8 +84,12 @@ export default function HomePage() {
             <Link href="/ai-debate" className="group">
               <div className="p-6 rounded-lg border bg-card hover:bg-accent transition-colors h-full">
                 <Bot className="h-10 w-10 mb-4 text-primary" />
-                <h3 className="font-semibold text-lg mb-2">Tranh biện với AI</h3>
-                <p className="text-sm text-muted-foreground mb-4">Luyện tập kỹ năng tranh luận với trí tuệ nhân tạo</p>
+                <h3 className="font-semibold text-lg mb-2">
+                  Tranh biện với AI
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Luyện tập kỹ năng tranh luận với trí tuệ nhân tạo
+                </p>
                 <div className="flex items-center text-sm font-medium text-primary group-hover:translate-x-1 transition-transform">
                   Bắt đầu <ArrowRight className="ml-1 h-4 w-4" />
                 </div>
@@ -101,7 +122,9 @@ export default function HomePage() {
                   Học cách tranh biện hiệu quả qua các video hướng dẫn chi tiết
                 </p>
               </div>
-              {isAdmin && <VideoUploadDialog onVideoUploaded={handleVideoUploaded} />}
+              {isAdmin && (
+                <VideoUploadDialog onVideoUploaded={handleVideoUploaded} />
+              )}
             </div>
 
             {loading ? (
@@ -118,16 +141,27 @@ export default function HomePage() {
               <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
                 <div className="text-center px-4">
                   <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-base font-medium">Chưa có video hướng dẫn</p>
+                  <p className="text-base font-medium">
+                    Chưa có video hướng dẫn
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {isAdmin ? "Thêm video đầu tiên để bắt đầu" : "Video sẽ được cập nhật sớm"}
+                    {isAdmin
+                      ? "Thêm video đầu tiên để bắt đầu"
+                      : "Video sẽ được cập nhật sớm"}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {videos.map((video) => (
-                  <VideoCard key={video.id} video={video} isAdmin={isAdmin} onPlay={setSelectedVideo} />
+                  <VideoCard
+                    key={video.id}
+                    video={video}
+                    isAdmin={isAdmin}
+                    onPlay={setSelectedVideo}
+                    onEdit={handleEditVideo}
+                    onDelete={handleDeleteVideo}
+                  />
                 ))}
               </div>
             )}
@@ -143,9 +177,11 @@ export default function HomePage() {
 
       <footer className="mt-12 sm:mt-16 border-t bg-muted/30 py-6 sm:py-8">
         <div className="container mx-auto px-4 text-center text-xs sm:text-sm text-muted-foreground">
-          <p>© 2025 Nền tảng Tranh Biện. Phát triển kỹ năng tranh luận của bạn.</p>
+          <p>
+            © 2025 Nền tảng Tranh Biện. Phát triển kỹ năng tranh luận của bạn.
+          </p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
