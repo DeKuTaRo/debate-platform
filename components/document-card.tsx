@@ -81,16 +81,20 @@ export function DocumentCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {isEditing ? (
-          <textarea
-            className="w-full border rounded p-1"
-            value={editedDocument.description}
-            onChange={(e) =>
-              setEditedDocument({
-                ...editedDocument,
-                description: e.target.value,
-              })
-            }
+        {document.fileType === "PNG" ||
+        document.fileType === "JPG" ||
+        document.fileType === "JPEG" ||
+        document.fileType === "GIF" ? (
+          <img
+            src={document.fileUrl}
+            alt={document.title}
+            className="w-full h-48 object-cover rounded"
+          />
+        ) : document.fileType === "MP4" || document.fileType === "MOV" ? (
+          <video
+            src={document.fileUrl}
+            controls
+            className="w-full h-48 object-cover rounded"
           />
         ) : (
           document.description && (

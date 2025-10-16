@@ -60,6 +60,12 @@ export function DocumentUploadDialog({
       txt: "Text",
       zip: "Archive",
       rar: "Archive",
+      png: "PNG",
+      jpg: "JPG",
+      jpeg: "JPEG",
+      gif: "GIF",
+      mp4: "MP4",
+      mov: "MOV",
     };
     return typeMap[ext || ""] || ext?.toUpperCase() || "File";
   };
@@ -144,9 +150,25 @@ export function DocumentUploadDialog({
               {file && <FileText className="h-5 w-5 text-primary" />}
             </div>
             {file && (
-              <p className="text-xs text-muted-foreground">
-                {file.name} ({formatFileSize(file.size)})
-              </p>
+              <div className="mt-2">
+                {file.type.startsWith("image/") ? (
+                  <img
+                    src={fileUrl}
+                    alt="Preview"
+                    className="w-full h-48 object-cover rounded"
+                  />
+                ) : file.type.startsWith("video/") ? (
+                  <video
+                    src={fileUrl}
+                    controls
+                    className="w-full h-48 object-cover rounded"
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Không thể preview file này
+                  </p>
+                )}
+              </div>
             )}
             <p className="text-xs text-muted-foreground">
               Hoặc nhập URL file bên dưới
